@@ -1,5 +1,6 @@
 
 
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -23,8 +24,10 @@ data.head()
 
 # Total missing values for each feature
 print(data.isnull().sum())
-# drop last column with 562 missing values
-data = data.drop(['HOA'], axis=1)
+
+
+# Replace missing values in "HOA" column with zeroes
+data['HOA'] = data['HOA'].fillna(0)
 print(data.shape)
 
 
@@ -64,7 +67,7 @@ print(IQR)
 
 #boxplot of all the features
 import seaborn as sns
-data2 = data[["MLS","sold_price","zipcode","longitude","latitude",	"lot_acres","taxes","year_built","bedrooms","bathrooms","sqrt_ft","garage","kitchen_features","fireplaces","floor_covering"	]]
+data2 = data[["MLS","sold_price","zipcode","longitude","latitude","lot_acres","taxes","year_built","bedrooms","bathrooms","sqrt_ft","garage","kitchen_features","fireplaces","floor_covering"	]]
 ax = sns.boxplot(data = data2, orient = "h", palette = "Set2")
 
 # look for outliers using boxplot, histogram and scatterplot
