@@ -1,0 +1,116 @@
+
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# import dataset
+data = pd.read_csv("/content/drive/MyDrive/Colab Notebooks/raw_house_data.csv")
+data.head()
+
+data.tail()
+
+print(data.shape)
+print(data.info())
+
+# summarize the dataset
+print(data.describe())
+
+# look for Non-Standard Missing Values
+missing_values = ["None"]  
+data = pd.read_csv("/content/drive/MyDrive/Colab Notebooks/raw_house_data.csv", na_values = missing_values)
+data.head()
+
+# Total missing values for each feature
+print(data.isnull().sum())
+# drop last column with 562 missing values
+data = data.drop(['HOA'], axis=1)
+print(data.shape)
+
+
+# replace missing values with the column mean and median
+data['lot_acres'] = data['lot_acres'].fillna(data['lot_acres'].mean())
+data['sqrt_ft'] = data['sqrt_ft'].fillna(data['sqrt_ft'].mean())
+data['garage'] = data['garage'].fillna(data['garage'].median())
+data['bathrooms'] = data['bathrooms'].fillna(data['bathrooms'].median())
+
+
+# Impute missing values with nearby values
+data["kitchen_features"] = data["kitchen_features"].fillna(method='bfill')
+data["floor_covering"] = data["floor_covering"].fillna(method='bfill')
+
+# drop rows with missing values
+data.dropna()
+
+
+# check for missing values
+data.isnull().sum()
+
+# import preprocessing from sklearn
+from sklearn import preprocessing
+# encode labels with value between 0 and n_classes-1.
+le = preprocessing.LabelEncoder()
+
+#  apply le.fit_transform to categorical columns
+data['kitchen_features'] = le.fit_transform(data['kitchen_features'])
+data['floor_covering'] = le.fit_transform(data['floor_covering'])
+data.head()
+
+#Identifying Outliers with Interquartile Range (IQR)
+Q1 = data.quantile(0.25) 
+Q3 = data.quantile(0.75)
+IQR = Q3 - Q1
+print(IQR)
+
+#boxplot of all the features
+import seaborn as sns
+data2 = data[["MLS","sold_price","zipcode","longitude","latitude",	"lot_acres","taxes","year_built","bedrooms","bathrooms","sqrt_ft","garage","kitchen_features","fireplaces","floor_covering"	]]
+ax = sns.boxplot(data = data2, orient = "h", palette = "Set2")
+
+# look for outliers using boxplot, histogram and scatterplot
+plt.boxplot(data["sold_price"])
+plt.show()
+
+plt.boxplot(data["lot_acres"])
+plt.show()
+
+plt.boxplot(data["taxes"])
+plt.show()
+
+plt.boxplot(data["garage"])
+plt.show()
+
+
+data.MLS.hist()
+
+data.sold_price.hist()
+
+# scatterplot
+fig, ax = plt.subplots(figsize=(12,6))
+ax.scatter(data['sold_price'], data['taxes'],  alpha=0.25)
+ax.set_xlabel('sold_price')
+ax.set_ylabel('Taxes in USD')
+plt.show()
+
+# Identifying Outliers with Skewness
+print(data['MLS'].skew())
+data['MLS'].describe()
+
+print(data['lot_acres'].skew())
+data['lot_acres'].describe()
+
+print(data['taxes'].skew())
+data['taxes'].describe()
+
+# scale "MLS", "sold_price" and "taxes" features
+data['MLS_log'] = [np.log(x) for x in data['MLS']]
+data['sold_price_log'] = [np.log(x) for x in data['sold_price']]
+data['taxes_log'] = [np.log(x) for x in data['taxes']]
+print(data)
+
+data.drop(['MLS', 'sold_price', 'taxes'], axis='columns', inplace=True)
+print(data)
+
+#convert data to numpy
+x = data.to_numpy()
+x
